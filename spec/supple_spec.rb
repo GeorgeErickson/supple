@@ -2,7 +2,13 @@ require 'spec_helper'
 require 'supple'
 
 describe Supple do
-  it 'should have a VERSION constant' do
-    subject.const_get('VERSION').should_not be_empty
+  describe 'config' do
+    it do
+      subject.configure do |config|
+        config.pool_size = 15
+      end
+
+      expect(subject.config.pool_size).to eq(15)
+    end
   end
 end
