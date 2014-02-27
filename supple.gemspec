@@ -5,8 +5,8 @@ require File.expand_path('../lib/supple/version', __FILE__)
 Gem::Specification.new do |gem|
   gem.name          = "supple"
   gem.version       = Supple::VERSION
-  gem.summary       = %q{TODO: Summary}
-  gem.description   = %q{TODO: Description}
+  gem.summary       = "An elasticsearch rails plugin"
+  gem.description   = "A modern es plugin"
   gem.license       = "MIT"
   gem.authors       = ["George Erickson"]
   gem.email         = "george55@mit.edu"
