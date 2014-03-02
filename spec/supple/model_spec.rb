@@ -1,13 +1,4 @@
 require 'spec_helper'
-require 'active_record'
-require 'sqlite3'
-require 'supple'
-require 'acts_as_fu'
-require 'pry'
-
-RSpec.configure do |config|
-  config.include ActsAsFu
-end
 
 describe Supple do
   before(:each) do

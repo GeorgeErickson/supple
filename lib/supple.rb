@@ -1,7 +1,10 @@
 require 'elasticsearch'
 require 'connection_pool'
 require 'active_support/concern'
+require 'active_support/descendants_tracker'
 require 'virtus'
+
+require 'supple/util'
 require 'supple/config'
 require 'supple/model'
 

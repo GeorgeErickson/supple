@@ -6,7 +6,6 @@ module Supple
 
       attribute :pool_size, Integer, default: 5
       attribute :pool_timeout, Integer, default: 1
-      attribute :index_name, String, default: 'index'
     end
 
     module ClassMethods
