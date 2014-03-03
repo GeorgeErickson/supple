@@ -1,26 +1,28 @@
 require 'elasticsearch'
 require 'connection_pool'
-require 'active_support/concern'
-require 'active_support/descendants_tracker'
-require 'virtus'
+require 'active_support/core_ext'
+require 'bonfig'
 
 require 'supple/util'
-require 'supple/config'
 require 'supple/model'
+require 'supple/tasks'
 
 module Supple
-  include Supple::Config
+  extend Bonfig
 
-  module Connection
-    def self.create
-      ConnectionPool.new(timeout: config.pool_timeout, size: config.pool_size) do
-        Elasticsearch::Client.new(adapter: :patron)
-      end
+  bonfig do
+    config :pool do
+      config :size, default: 5
+      config :timeout, default: 1
     end
   end
 
-  def self.es(&block)
-    @es ||= Connection.create
-    @es.with(&block)
+  def self.register_model(model)
+    Thread.current[:registry] ||= []
+    registry << model unless registry.include?(model)
+  end
+
+  def self.registry
+    ActiveRecord::Base.descendants
   end
 end

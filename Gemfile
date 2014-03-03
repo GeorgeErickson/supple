@@ -4,10 +4,8 @@ gemspec
 
 gem 'patron'
 gem 'activesupport'
-gem 'virtus'
 gem 'connection_pool'
 gem 'elasticsearch', git: 'git://github.com/elasticsearch/elasticsearch-ruby.git', branch: 'master'
-gem 'acts_as_fu'
 
 group :test do
   gem 'activerecord'

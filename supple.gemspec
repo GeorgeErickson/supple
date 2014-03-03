@@ -18,8 +18,9 @@ Gem::Specification.new do |gem|
   gem.require_paths = ['lib']
 
 
-  gem.add_dependency 'virtus'
   gem.add_dependency 'patron'
+  gem.add_dependency 'ansi'
+  gem.add_dependency 'bonfig'
   gem.add_development_dependency 'bundler', '~> 1.0'
   gem.add_development_dependency 'rake', '~> 0.8'
   gem.add_development_dependency 'rspec', '~> 2.4'
