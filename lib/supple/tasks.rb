@@ -6,7 +6,8 @@ namespace :supple do
 
     task all: :environment do
       Rails.application.eager_load! if defined?(Rails)
-      ActiveRecord::Base.descendants.each do |model|
+      Supple.models.each do |model|
+        puts 1
         puts model
       end
     end

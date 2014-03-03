@@ -2,7 +2,6 @@ require 'spec_helper'
 
 describe Supple do
   context 'registry' do
-    it { expect(subject.registry).to eq([Product]) }
-
+    it { expect(subject.models).to eq([Product]) }
   end
 end

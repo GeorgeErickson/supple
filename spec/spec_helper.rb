@@ -2,6 +2,7 @@ require 'rspec'
 require 'supple'
 require 'active_record'
 require 'sqlite3'
+require 'factory_girl'
 require 'pry'
 
 ActiveRecord::Base.establish_connection(
@@ -9,20 +10,8 @@ ActiveRecord::Base.establish_connection(
   database: ':memory:'
 )
 
-ActiveRecord::Migration.create_table :products, force: true do |t|
-  t.string :name
-  t.string :color
+Dir[File.dirname(__FILE__) + '/factories/*.rb'].each { |file| require file }
 
-  t.timestamps
-end
-
-ActiveRecord::Migration.create_table :variants, force: true do |t|
-  t.decimal 'price', precision: 8, scale: 2, default: 0.0, null: false
-  t.integer 'product_id', null: false
-
-  t.timestamps
-end
-
-class Product < ActiveRecord::Base
-  include Supple::Model
+RSpec.configure do |config|
+  config.include FactoryGirl::Syntax::Methods
 end

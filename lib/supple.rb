@@ -17,12 +17,9 @@ module Supple
     end
   end
 
-  def self.register_model(model)
-    Thread.current[:registry] ||= []
-    registry << model unless registry.include?(model)
-  end
-
-  def self.registry
-    ActiveRecord::Base.descendants
+  def self.models
+    ActiveRecord::Base.descendants.select do |m|
+      m.included_modules.include?(Supple::Model)
+    end
   end
 end
