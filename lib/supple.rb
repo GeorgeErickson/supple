@@ -20,6 +20,12 @@ module Supple
       m.included_modules.include?(Supple::Model)
     end
   end
+
+  def self.client
+    @client ||= ConnectionPool.new(timeout: config.pool.timeout, size: config.pool.size) do
+      Elasticsearch::Client.new(adapter: :patron)
+    end
+  end
 end
 
 require 'supple/railtie' if defined?(Rails)
