@@ -3,9 +3,7 @@ require 'connection_pool'
 require 'active_support/core_ext'
 require 'bonfig'
 
-require 'supple/util'
 require 'supple/model'
-require 'supple/tasks'
 
 module Supple
   extend Bonfig
@@ -23,3 +21,5 @@ module Supple
     end
   end
 end
+
+require 'supple/railtie' if defined?(Rails)

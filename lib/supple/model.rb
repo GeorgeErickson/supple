@@ -11,7 +11,7 @@ module Supple
       end
 
       def reindex
-        puts 'fuck'
+        puts index_name + 'ddd'
       end
     end
   end
