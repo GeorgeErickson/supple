@@ -2,6 +2,7 @@ require 'elasticsearch'
 require 'connection_pool'
 require 'active_support/core_ext'
 require 'bonfig'
+require 'rails'
 
 require 'supple/model'
 
@@ -9,7 +10,7 @@ module Supple
   extend Bonfig
 
   bonfig do
-    config :pool do
+    config :client do
       config :size, default: 5
       config :timeout, default: 1
     end
@@ -22,9 +23,7 @@ module Supple
   end
 
   def self.client
-    @client ||= ConnectionPool.new(timeout: config.pool.timeout, size: config.pool.size) do
-      Elasticsearch::Client.new(adapter: :patron)
-    end
+    @client ||= Elasticsearch::Client.new(adapter: :patron)
   end
 end
 

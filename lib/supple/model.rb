@@ -1,43 +1,99 @@
 module Supple
-  module Client
-    def es_delegate(api, action)
-      define_singleton_method(action) do |*args, &block|
-        Supple.client.with do |client|
-          client.send(api).send(action, *args, &block)
-        end
-      end
-    end
-
-    def es_delegate_all(api)
-      define_singleton_method(:method_missing) do |name, *args, &block|
-        es_delegate(api, name)
-        send(name, *args, &block)
-      end
+  module WithClient
+    extend ActiveSupport::Concern
+    mattr_reader :client do
+      Supple.client
     end
   end
 
-  module Index
-    extend Client
-    es_delegate_all(:indices)
+  class Importer
+    def initialize(scope)
+      @scope = scope
+    end
+
+    def execute!
+      @scope.find_in_batches do |batch|
+        Supple.client.bulk {
+          index: @scope.index_name,
+          type: @scope.document_type,
+          body: transform_batch(batch)
+        }
+      end
+    end
+
+    protected
+
+    def transform_batch(batch)
+       batch.map { |a| { index: { _id: a.id, data: a.as_indexed_json } } }
+    end
   end
+
+
+  class ModelClient
+    attr_reader :model
+    delegate :index_name, :document_type, :as_indexed_json, to: :model
+
+    def initialize(model)
+      @model = model
+    end
+
+    def index
+      run(:index, body: as_indexed_json)
+    end
+
+    def delete
+      run(:delete)
+    end
+
+    private
+
+    def run(method, extra = {})
+      action = Supple.client.method(method)
+      action.call {
+        index: index_name,
+        type: document_type,
+        id: model.id,
+      }.merge(extra)
+    end
+  end
+
 
   module Model
     extend ActiveSupport::Concern
+
+    def es
+      @es ||= ModelClient.new(self)
+    end
+
+    def as_indexed_json
+      as_json
+    end
+
+
     included do
-      after_commit :reindex
+      with_options instance_writer: false do
+
+        cattr_accessor :index_name do
+          [table_name, Rails.env].join('_')
+        end
+
+        cattr_accessor :document_type do
+          table_name
+        end
+      end
+
+      after_commit lambda { es.index }, on: [:update, :create]
+      after_commit lambda { es.delete }, on: :destroy
+
     end
 
     module ClassMethods
-      def es_index_name
-        @index_name ||= [table_name, Rails.env].join('_')
+      def index_scope
+        self.all
       end
 
-      def reindex
-        alias_name = es_index_name
-        new_index = alias_name + '_' + Time.now.strftime('%Y%m%d%H%M%S%L')
-
-        a = Index.get_alias(name: alias_name)
-        puts a
+      def import(options = {})
+        Importer.new(index_scope).execute!
       end
     end
   end
