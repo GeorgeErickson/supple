@@ -9,7 +9,6 @@ describe Supple do
     subject { Product }
     it 'defaults document_type to the table name of the model' do
       expect(Product.document_type).to eq('products')
-      binding.pry
     end
   end
 end

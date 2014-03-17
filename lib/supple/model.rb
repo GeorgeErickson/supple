@@ -7,17 +7,18 @@ module Supple
   end
 
   class Importer
-    def initialize(scope)
+    def initialize(scope, index_name)
       @scope = scope
+      @index_name = index_name
     end
 
     def execute!
       @scope.find_in_batches do |batch|
-        Supple.client.bulk {
-          index: @scope.index_name,
+        Supple.client.bulk({
+          index: @index_name,
           type: @scope.document_type,
           body: transform_batch(batch)
-        }
+        })
       end
     end
 
@@ -49,11 +50,11 @@ module Supple
 
     def run(method, extra = {})
       action = Supple.client.method(method)
-      action.call {
+      action.call({
         index: index_name,
         type: document_type,
         id: model.id,
-      }.merge(extra)
+      }).merge(extra)
     end
   end
 
@@ -88,13 +89,83 @@ module Supple
     end
 
     module ClassMethods
+
       def index_scope
         self.all
       end
 
-      def import(options = {})
-        Importer.new(index_scope).execute!
+      def reindex(options = {})
+        alias_name = index_name
+        new_index_name = alias_name + "_" + Time.now.strftime("%Y%m%d%H%M%S%L")
+        client = Supple.client
+
+        # TODO - Get mapping
+        mappings = {}
+        fields = {
+          name: {type: "string", analyzer: "keyword"},
+          analyzed: {type: "string", index: "analyzed"}
+        }
+        SETTINGS[:analysis][:analyzer].each do |name, value|
+          fields[name] = {type: "string", index: "analyzed", analyzer: name}
+        end
+
+
+
+        mappings[document_type] = {
+          properties: {
+            name: {
+              type: :multi_field,
+              fields: fields,
+            },
+            suggest: {
+              type: "completion",
+              payloads: true
+            },
+            variants: {
+              type: "nested",
+              properties: {
+                id: {type: "long"},
+                price: {type: "long"}
+              }
+            }
+          },
+          dynamic_templates: [{
+            nested_taxonomies: {
+              match: "taxonomy:*",
+              mapping: {
+                type: :nested,
+                properties: {
+                  name: {
+                    type: :string,
+                    analyzer: :keyword
+                  }
+                }
+              }
+            }
+          }]
+        }
+        # Create Index
+        client.indices.create index: new_index_name,
+          body: {
+            settings: Supple::SETTINGS,
+            mappings: mappings
+          }
+
+        if client.indices.exists_alias(name: alias_name)
+          existing_alias = client.indices.get_alias(name: alias_name)
+          Importer.new(index_scope, new_index_name).execute!
+          client.indices.delete index: existing_alias.keys
+          client.indices.put_alias index: new_index_name, name: alias_name
+        else
+          client.indices.put_alias index: new_index_name, name: alias_name
+          Importer.new(index_scope, new_index_name).execute!
+        end
       end
+
+      private
+
+
+
     end
   end
 end

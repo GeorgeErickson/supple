@@ -1,8 +1,16 @@
-require 'rubygems'
-require 'bundler/setup'
-require 'benchmark'
+$:.unshift 'lib'
+require 'yaml'
 require 'supple'
+require 'pry'
 
-Supple.es do |client|
+analysis = File.open('settings.yml') {|f| YAML.load(f.read)}
+settings = {
+  settings: {
+    analysis: analysis
+  }
+}
+Supple.client.indices.delete index: 'test' rescue puts 'no exist'
+Supple.client.indices.create index: 'test', body: settings
 
-end
+tokens = Supple.client.indices.analyze text: "Booker's True Barrel", index: 'test', analyzer: 'auto'
+puts tokens["tokens"].map {|t| t["token"]}

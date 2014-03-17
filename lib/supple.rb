@@ -4,12 +4,15 @@ require 'active_support/core_ext'
 require 'bonfig'
 require 'rails'
 
-require 'supple/model'
+
 
 module Supple
   extend Bonfig
 
   bonfig do
+    config :index do
+      config :default_settings, default: {}
+    end
     config :client do
       config :size, default: 5
       config :timeout, default: 1
@@ -26,5 +29,7 @@ module Supple
     @client ||= Elasticsearch::Client.new(adapter: :patron)
   end
 end
-
+require 'supple/defaults'
+require 'supple/model'
+# require 'supple/index'
 require 'supple/railtie' if defined?(Rails)
