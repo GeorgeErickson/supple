@@ -1,11 +1,4 @@
 module Supple
-  module WithClient
-    extend ActiveSupport::Concern
-    mattr_reader :client do
-      Supple.client
-    end
-  end
-
   class Importer
     def initialize(scope, index_name, document_type)
       @scope = scope

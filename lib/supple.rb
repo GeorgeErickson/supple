@@ -32,8 +32,7 @@ module Supple
     @client ||= Elasticsearch::Client.new(config.client.to_hash)
   end
 end
-require 'supple/defaults'
+
 require 'supple/model/dsl'
 require 'supple/model'
-# require 'supple/index'
 require 'supple/railtie' if defined?(Rails)
