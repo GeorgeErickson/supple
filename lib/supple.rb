@@ -10,15 +10,10 @@ module Supple
   extend Bonfig
 
   bonfig do
+    config :host
     config :index do
       config :default_index_name, default: Proc.new { |model| [model.table_name, Rails.env].join('_') }
       config :default_document_type, default: Proc.new { |model| model.table_name }
-    end
-
-
-    config :client do
-      config :host
-      config :adapter, default: :patron
     end
   end
 
@@ -27,9 +22,16 @@ module Supple
       m.included_modules.include?(Supple::Model)
     end
   end
+  def self.client!
+    Elasticsearch::Client.new(host: Supple.config.host)
+  end
 
   def self.client
-    @client ||= Elasticsearch::Client.new(config.client.to_hash)
+    client!
+  end
+
+  def self.refresh_connection!
+    @client = Elasticsearch::Client.new(host: Supple.config.host)
   end
 end
 
