@@ -27,7 +27,7 @@ module Supple
   end
 
   def self.client
-    client!
+    @client ||= client!
   end
 
   def self.refresh_connection!
