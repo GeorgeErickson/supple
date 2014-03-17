@@ -10,8 +10,10 @@ module Supple
   extend Bonfig
 
   bonfig do
+    config :index_name_method, default: Proc.new { |model| [model.table_name, Rails.env].join('_') }
     config :index do
-      config :default_settings, default: {}
+      config :default_index_name, default: Proc.new { |model| [model.table_name, Rails.env].join('_') }
+      config :default_document_type, default: Proc.new { |model| model.table_name }
     end
     config :client do
       config :size, default: 5
@@ -30,6 +32,7 @@ module Supple
   end
 end
 require 'supple/defaults'
+require 'supple/model/dsl'
 require 'supple/model'
 # require 'supple/index'
 require 'supple/railtie' if defined?(Rails)

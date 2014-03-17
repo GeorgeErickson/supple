@@ -4,3 +4,4 @@ pkg/
 vendor/cache/*.gem
 .bundle/
 .DS_Store
+*.sublime-workspace

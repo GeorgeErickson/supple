@@ -6,7 +6,7 @@ namespace :supple do
       Rails.application.eager_load! if defined?(Rails)
 
       Supple.models.each do |model|
-        model.reindex
+        model.supple.reindex
       end
     end
   end
