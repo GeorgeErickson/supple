@@ -121,6 +121,10 @@ module Supple
       end
 
     end
+
+    def search(body)
+      client.search(index: index_name, type: document_type, body: body)
+    end
   end
 
 
